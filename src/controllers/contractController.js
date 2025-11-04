@@ -2,9 +2,34 @@ const contractService = require('../services/contractService');
 
 function register(req, res, next) {
   try {
-    const consultantId = req.user.id;
-    const raw = req.body.raw;
-    const contract = contractService.registerContract({ raw, consultantId });
+    const actor = req.user; // { id, role }
+    const {
+      raw,
+      consultantId,
+      codigoRAE,
+      empresaCredenciada,
+      profissionalResponsavel,
+      quantidadeHoras,
+      objetivoContratacao,
+      dataExecucaoServicos,
+      localCliente,
+      plataformaConsultoria
+    } = req.body;
+
+    const contract = contractService.registerContract({ 
+      raw, 
+      consultantId, 
+      codigoRAE,
+      empresaCredenciada,
+      profissionalResponsavel,
+      quantidadeHoras,
+      objetivoContratacao,
+      dataExecucaoServicos,
+      localCliente,
+      plataformaConsultoria,
+      actor 
+    });
+    
     res.status(201).json(contract);
   } catch (err) {
     next(err);

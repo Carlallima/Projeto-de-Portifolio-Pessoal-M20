@@ -14,6 +14,7 @@ Principais funcionalidades
 - Registro de usuários (Consultores e Gestores).
 - Autenticação via `/auth/login` retornando token JWT.
 - Registro de contrato que simula extração de dados (número do contrato e nome do cliente) e associa ao consultor logado.
+- Registro de contrato que simula extração de dados (número do contrato e nome do cliente) e associa ao consultor logado. Se o cadastro for feito por um Gestor, ele pode atribuir o contrato a um consultor (passando `consultantId`) e a API irá simular o envio de uma mensagem via WhatsApp para o consultor responsável.
 - Listagem de contratos: Gestores veem todos; Consultores veem apenas seus contratos.
 
 Instalação

@@ -50,20 +50,152 @@ components:
       properties:
         token:
           type: string
+    Email:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID do envio de e-mail
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        destinatario:
+          type: string
+          description: Endereço de e-mail do destinatário
+          example: "consultor@example.com"
+        assunto:
+          type: string
+          example: "Novo contrato registrado"
+        mensagem:
+          type: string
+          example: "Detalhes do contrato..."
+        dataEnvio:
+          type: string
+          format: date-time
+          example: "2025-10-30T14:30:00.000Z"
     Contract:
       type: object
       properties:
-        id: { type: string }
-        contractNumber: { type: string }
-        clientName: { type: string }
-        consultantId: { type: string }
-        createdAt: { type: string, format: date-time }
+        id: 
+          type: string
+          description: ID único do contrato
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        contractNumber:
+          type: string
+          description: Número do contrato
+          example: "CT-2025/001"
+        clientName:
+          type: string
+          description: Nome do cliente/empresa
+          example: "Empresa ABC Ltda"
+        consultantId:
+          type: string
+          description: ID do consultor responsável
+          example: "7c8e5f30-b7d1-4c3a-9e8b-1a2b3c4d5e6f"
+        processo:
+          type: string
+          description: Número do processo administrativo
+          example: "PROC-2025/789"
+        editalCredenciamento:
+          type: string
+          description: Número do edital de credenciamento
+          example: "EDITAL-CRED-2025/001"
+        codigoRAE:
+          type: string
+          description: Código RAE do contrato
+          example: "RAE-2025-123"
+        empresaCredenciada:
+          type: string
+          description: Nome da empresa credenciada
+          example: "Consultoria XYZ Ltda"
+        profissionalResponsavel:
+          type: string
+          description: Nome do profissional responsável
+          example: "João Silva"
+        quantidadeHoras:
+          type: number
+          description: Quantidade de horas do contrato
+          example: 40
+        objetivoContratacao:
+          type: string
+          description: Objetivo da contratação
+          example: "Consultoria em gestão empresarial"
+        dataExecucaoServicos:
+          type: string
+          format: date
+          description: Data de execução dos serviços
+          example: "2025-11-15"
+        localCliente:
+          type: string
+          description: Local do cliente
+          example: "São Paulo - SP"
+        plataformaConsultoria:
+          type: string
+          description: Plataforma utilizada para consultoria
+          example: "Microsoft Teams"
+        createdAt:
+          type: string
+          format: date-time
+          description: Data e hora de criação do contrato
+          example: "2025-10-30T14:30:00.000Z"
     ContractRegister:
       type: object
+      required: [raw]
       properties:
         raw:
           type: object
-          description: Dados brutos simulados da extração (contractNumber, clientName)
+          required: [contractNumber, clientName, processo, editalCredenciamento]
+          properties:
+            contractNumber:
+              type: string
+              description: Número do contrato
+              example: "CT-2025/001"
+            clientName:
+              type: string
+              description: Nome do cliente/empresa
+              example: "Empresa ABC Ltda"
+            processo:
+              type: string
+              description: Número do processo administrativo
+              example: "PROC-2025/789"
+            editalCredenciamento:
+              type: string
+              description: Número do edital de credenciamento
+              example: "EDITAL-CRED-2025/001"
+            codigoRAE:
+              type: string
+              description: Código RAE do contrato
+              example: "RAE-2025-123"
+            empresaCredenciada:
+              type: string
+              description: Nome da empresa credenciada
+              example: "Consultoria XYZ Ltda"
+            profissionalResponsavel:
+              type: string
+              description: Nome do profissional responsável
+              example: "João Silva"
+            quantidadeHoras:
+              type: number
+              description: Quantidade de horas do contrato
+              example: 40
+            objetivoContratacao:
+              type: string
+              description: Objetivo da contratação
+              example: "Consultoria em gestão empresarial"
+            dataExecucaoServicos:
+              type: string
+              format: date
+              description: Data de execução dos serviços
+              example: "2025-11-15"
+            localCliente:
+              type: string
+              description: Local do cliente
+              example: "São Paulo - SP"
+            plataformaConsultoria:
+              type: string
+              description: Plataforma utilizada para consultoria
+              example: "Microsoft Teams"
+        consultantId:
+          type: string
+          description: ID do consultor responsável (obrigatório quando o cadastrante for GESTOR)
 
 security:
   - bearerAuth: []
@@ -153,15 +285,23 @@ paths:
           description: Requisição inválida
         '401':
           description: Não autenticado
+        '403':
+          description: Acesso negado (ex.: consultor tentando criar para outro consultor)
+        '404':
+          description: Consultor não encontrado
 
     get:
-      summary: Listar contratos (Gestor vê todos, Consultor só os seus)
+      summary: Listar contratos cadastrados
+      description: >-
+        Retorna lista de contratos com base no papel do usuário:
+        * GESTOR - vê todos os contratos
+        * CONSULTOR - vê apenas seus próprios contratos
       tags: [Contracts]
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: Lista de contratos
+          description: Lista de contratos recuperada com sucesso
           content:
             application/json:
               schema:
@@ -169,7 +309,86 @@ paths:
                 items:
                   $ref: '#/components/schemas/Contract'
         '401':
+          description: Não autenticado - token ausente ou inválido
+        '403':
+          description: Acesso negado - usuário não tem permissão para ver estes contratos
+
+  /emails:
+    get:
+      summary: Listar histórico de e-mails enviados (apenas Gestor)
+      tags: [Emails]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de e-mails enviados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Email'
+        '401':
           description: Não autenticado
+        '403':
+          description: Acesso negado
+
+  /emails/send:
+    post:
+      summary: Enviar e-mail manualmente (apenas Gestor)
+      tags: [Emails]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [destinatario, assunto, mensagem]
+              properties:
+                destinatario: { type: string }
+                assunto: { type: string }
+                mensagem: { type: string }
+      responses:
+        '201':
+          description: E-mail enviado e registrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '400':
+          description: Dados inválidos
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
+
+  /notifications:
+    get:
+      summary: Listar notificações simuladas (apenas Gestores)
+      tags: [Notifications]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de notificações enviadas (simuladas)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    to: { type: string }
+                    toName: { type: string }
+                    phone: { type: string }
+                    message: { type: string }
+                    sentAt: { type: string, format: date-time }
+        '401':
+          description: Não autenticado
+        '403':
+          description: Acesso negado
 
   /:
     get:

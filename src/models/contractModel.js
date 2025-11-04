@@ -2,12 +2,36 @@ const { v4: uuidv4 } = require('uuid');
 
 const contracts = [];
 
-function createContract({ contractNumber, clientName, consultantId }) {
+function createContract({ 
+  contractNumber, 
+  clientName, 
+  consultantId, 
+  processo, 
+  editalCredenciamento,
+  codigoRAE,
+  empresaCredenciada,
+  profissionalResponsavel,
+  quantidadeHoras,
+  objetivoContratacao,
+  dataExecucaoServicos,
+  localCliente,
+  plataformaConsultoria
+}) {
   const contract = {
     id: uuidv4(),
     contractNumber,
     clientName,
     consultantId,
+    processo,
+    editalCredenciamento,
+    codigoRAE,
+    empresaCredenciada,
+    profissionalResponsavel,
+    quantidadeHoras,
+    objetivoContratacao,
+    dataExecucaoServicos,
+    localCliente,
+    plataformaConsultoria,
     createdAt: new Date().toISOString(),
   };
   contracts.push(contract);

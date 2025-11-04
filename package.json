@@ -6,14 +6,14 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --timeout 10000 --recursive Tests/**/*.test.js"
   },
   "dependencies": {
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "swagger-ui-express": "^4.6.3",
-    "yamljs": "^0.3.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "yamljs": "^0.3.0"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,11 @@
   "bugs": {
     "url": "https://github.com/Carlallima/Projeto-de-Portifolio-Pessoal-M20/issues"
   },
-  "homepage": "https://github.com/Carlallima/Projeto-de-Portifolio-Pessoal-M20#readme"
+  "homepage": "https://github.com/Carlallima/Projeto-de-Portifolio-Pessoal-M20#readme",
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^11.7.4",
+    "nodemon": "^3.0.1",
+    "supertest": "^7.1.4"
+  }
 }
