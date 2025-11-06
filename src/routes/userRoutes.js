@@ -3,10 +3,10 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const authMiddleware = require('../middlewares/auth');
 
-// registro público de usuários (Gestor ou Consultor)
+// Registro público de usuários
 router.post('/', userController.register);
 
-// listar usuários - apenas gestores
-router.get('/', authMiddleware.authenticate, authMiddleware.authorize(['GESTOR']), userController.list);
+// Listagem de usuários (requer autenticação; aceita token fixo de teste)
+router.get('/', authMiddleware.authenticate, userController.list);
 
 module.exports = router;

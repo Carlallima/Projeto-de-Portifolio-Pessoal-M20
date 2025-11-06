@@ -31,7 +31,7 @@ components:
           enum: [GESTOR, CONSULTOR]
     UserRegister:
       type: object
-      required: [name, email, password, role]
+      required: [name, email, password]
       properties:
         name: { type: string }
         email: { type: string }
@@ -138,11 +138,10 @@ components:
           example: "2025-10-30T14:30:00.000Z"
     ContractRegister:
       type: object
-      required: [raw]
+      description: "É possível enviar os campos diretamente no corpo ou embutidos em 'raw'."
       properties:
         raw:
           type: object
-          required: [contractNumber, clientName, processo, editalCredenciamento]
           properties:
             contractNumber:
               type: string
@@ -196,12 +195,37 @@ components:
         consultantId:
           type: string
           description: ID do consultor responsável (obrigatório quando o cadastrante for GESTOR)
+        contractNumber:
+          type: string
+        clientName:
+          type: string
+        processo:
+          type: string
+        editalCredenciamento:
+          type: string
+        codigoRAE:
+          type: string
+        empresaCredenciada:
+          type: string
+        profissionalResponsavel:
+          type: string
+        quantidadeHoras:
+          type: number
+        objetivoContratacao:
+          type: string
+        dataExecucaoServicos:
+          type: string
+          format: date
+        localCliente:
+          type: string
+        plataformaConsultoria:
+          type: string
 
 security:
   - bearerAuth: []
 
 paths:
-  /auth/login:
+  /api/auth/login:
     post:
       summary: Login
       tags: [Auth]
@@ -223,7 +247,7 @@ paths:
         '401':
           description: Credenciais inválidas
 
-  /users:
+  /api/users:
     post:
       summary: Registrar usuário (Consultor ou Gestor)
       tags: [Users]
@@ -262,7 +286,7 @@ paths:
         '403':
           description: Acesso negado
 
-  /contracts:
+  /api/contracts:
     post:
       summary: Registrar contrato (Consultor fornece dados ou simulação)
       tags: [Contracts]
@@ -313,7 +337,7 @@ paths:
         '403':
           description: Acesso negado - usuário não tem permissão para ver estes contratos
 
-  /emails:
+  /api/emails:
     get:
       summary: Listar histórico de e-mails enviados (apenas Gestor)
       tags: [Emails]
@@ -333,7 +357,7 @@ paths:
         '403':
           description: Acesso negado
 
-  /emails/send:
+  /api/emails/send:
     post:
       summary: Enviar e-mail manualmente (apenas Gestor)
       tags: [Emails]
@@ -344,12 +368,19 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [destinatario, assunto, mensagem]
-              properties:
-                destinatario: { type: string }
-                assunto: { type: string }
-                mensagem: { type: string }
+              oneOf:
+                - type: object
+                  required: [destinatario, assunto, mensagem]
+                  properties:
+                    destinatario: { type: string }
+                    assunto: { type: string }
+                    mensagem: { type: string }
+                - type: object
+                  required: [to, subject, body]
+                  properties:
+                    to: { type: string }
+                    subject: { type: string }
+                    body: { type: string }
       responses:
         '201':
           description: E-mail enviado e registrado
@@ -364,7 +395,7 @@ paths:
         '403':
           description: Acesso negado
 
-  /notifications:
+  /api/notifications:
     get:
       summary: Listar notificações simuladas (apenas Gestores)
       tags: [Notifications]

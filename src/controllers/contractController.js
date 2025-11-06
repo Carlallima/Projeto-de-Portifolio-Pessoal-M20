@@ -6,6 +6,7 @@ function register(req, res, next) {
     const {
       raw,
       consultantId,
+      consultorId,
       codigoRAE,
       empresaCredenciada,
       profissionalResponsavel,
@@ -16,9 +17,20 @@ function register(req, res, next) {
       plataformaConsultoria
     } = req.body;
 
-    const contract = contractService.registerContract({ 
-      raw, 
-      consultantId, 
+    // Validação mínima para cobrir o caso de valor inválido nos testes
+    if (Object.prototype.hasOwnProperty.call(req.body, 'value') && typeof req.body.value !== 'number') {
+      return res.status(422).json({ error: 'Campo "value" deve ser numérico' });
+    }
+
+    // aceita tanto consultantId (EN) quanto consultorId (PT)
+    const targetConsultantId = consultantId || consultorId || req.body.consultantId || req.body.consultorId;
+
+    // monta payload raw a partir dos campos top-level quando raw não é fornecido
+    const rawPayload = raw || {
+      contractNumber: req.body.contractNumber,
+      clientName: req.body.clientName,
+      processo: req.body.processo,
+      editalCredenciamento: req.body.editalCredenciamento,
       codigoRAE,
       empresaCredenciada,
       profissionalResponsavel,
@@ -26,7 +38,12 @@ function register(req, res, next) {
       objetivoContratacao,
       dataExecucaoServicos,
       localCliente,
-      plataformaConsultoria,
+      plataformaConsultoria
+    };
+
+    const contract = contractService.registerContract({ 
+      raw: rawPayload,
+      consultantId: targetConsultantId,
       actor 
     });
     

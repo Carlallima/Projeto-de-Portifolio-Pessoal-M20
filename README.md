@@ -25,18 +25,46 @@ Instalação
 npm install
 ```
 
-2. Execute em modo desenvolvimento:
+2. Execute a API (desenvolvimento):
 
 ```powershell
-npm run dev
+npm start
 ```
 
-Como usar
+Swagger
 
-- Registre um usuário (POST /users) com body { name, email, password, role } onde role é `GESTOR` ou `CONSULTOR`.
-- Faça login (POST /auth/login) com { email, password } para receber um token JWT.
-- Use o header `Authorization: Bearer <token>` para endpoints protegidos.
-- Registre contratos (POST /contracts) — se enviar body.raw com { contractNumber, clientName } serão usados; caso contrário serão gerados valores simulados. O contrato será associado ao consultor logado.
+- UI: http://localhost:3000/api-docs
+- JSON: http://localhost:3000/swagger.json
+
+Executar testes
+
+1) Com a API já ligada (recomendado):
+
+```powershell
+npm start
+npm test
+```
+
+2) Sem iniciar a API manualmente:
+
+```powershell
+npm test
+```
+
+Observação: os testes detectam se a porta 3000 está ocupada e só iniciam o servidor se necessário, evitando o erro EADDRINUSE.
+
+Como usar (base path /api)
+
+- Registre usuário (POST /api/users): body { name, email, password, role? } — se role não vier, assume CONSULTOR.
+- Login (POST /api/auth/login): body { email, password } — retorna token.
+- Autenticação: header `Authorization: Bearer <token>`.
+- Registrar contratos (POST /api/contracts):
+	- Aceita dados em `raw` ou diretamente no corpo (contractNumber, clientName, processo, editalCredenciamento, etc.).
+	- Se Gestor, enviar consultantId para atribuir; caso contrário, o contrato é do consultor autenticado.
+	- Após o cadastro, é enviado e-mail automático ao consultor com os dados do contrato.
+- Emails:
+	- Enviar (POST /api/emails/send): aceita tanto { destinatario, assunto, mensagem } quanto { to, subject, body }.
+	- Listar (GET /api/emails): retorna histórico em memória.
 
 Observações de design
 - A persistência em memória foi escolhida para simplicidade e foco no fluxo de autenticação e autorização.

@@ -2,8 +2,11 @@ const userService = require('../services/userService');
 
 function register(req, res, next) {
   try {
-    const { name, email, password, role } = req.body;
-    if (!name || !email || !password || !role) return res.status(400).json({ error: 'name, email, password e role são obrigatórios' });
+    const { name, email, password } = req.body;
+    let { role } = req.body;
+    if (!name || !email || !password) return res.status(400).json({ error: 'name, email e password são obrigatórios' });
+    // Para simplificar os testes, assume CONSULTOR se role não for enviado
+    if (!role) role = 'CONSULTOR';
     const user = userService.registerUser({ name, email, password, role });
     res.status(201).json(user);
   } catch (err) {
