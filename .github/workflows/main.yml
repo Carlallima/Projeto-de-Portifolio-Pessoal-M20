@@ -2,9 +2,9 @@ name: CI - Testes de API (Mocha/K6)
 
 on:
   push:
-    branches: [ "main", "master" ] # Roda automaticamente em cada push
+    branches: [ "main", "master", "testes-performance" ]
   pull_request:
-    branches: [ "main", "master" ] # Roda em cada Pull Request
+    branches: [ "main", "master" ]
 
 jobs:
   tests:
@@ -14,7 +14,6 @@ jobs:
       - name: Checkout do Repositorio
         uses: actions/checkout@v4
 
-      
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
@@ -23,23 +22,40 @@ jobs:
       - name: Instalando as dependencias
         run: npm install
 
-      # 1. INICIAR O SERVIDOR DE APLICAÇÃO
-      # O servidor precisa estar rodando para os testes de integração se conectarem.
       - name: Iniciar o Servidor de Aplicacao
-        # O comando 'npm start' ou 'npm run server' deve iniciar sua API.
-        # O '&' é essencial para rodar em background.
         run: npm start & 
-        # Se você usa 'npm run server', troque o comando acima.
+        env:
+          PORT: 3000
+          JWT_SECRET: teste-secret-key
+          TEST_TOKEN: 123456789teste
 
-      # 2. RODAR TESTES DE INTEGRAÇÃO (Mocha/Chai/Supertest)
+      - name: Aguardar servidor iniciar
+        run: sleep 5
+
       - name: Executar Testes de Integracao (Mocha/Supertest)
-        # Este comando deve ser o que você usa para rodar seus testes de integração.
-        # Exemplo: 'npm test' ou 'mocha'
-        run: npm test 
+        run: npm test
+        env:
+          TEST_TOKEN: 123456789teste
+          PORT: 3000
 
-      # 3. RODAR TESTES DE PERFORMANCE (K6)
-      # Se o K6 estiver instalado globalmente ou via npm, este comando funciona.
-      - name: Executar Todos os Testes de Performance (K6)
-        run: k6 run tests/testk6/run_all_k6.js
+      - name: Instalar K6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Executar Teste K6 - Login
+        run: k6 run tests/testK6/login.test.js
+
+      - name: Executar Teste K6 - Usuarios
+        run: k6 run -e TEST_TOKEN=123456789teste tests/testK6/users.test.js
+
+      - name: Executar Teste K6 - Contratos
+        run: k6 run -e TEST_TOKEN=123456789teste tests/testK6/contracts.test.js
+
+      - name: Executar Teste K6 - Emails
+        run: k6 run -e TEST_TOKEN=123456789teste tests/testK6/email.test.js
     
       
