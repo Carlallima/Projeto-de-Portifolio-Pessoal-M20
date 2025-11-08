@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "mocha --timeout 10000 --reporter mochawesome --file tests/setup.js -- tests/**/*.test.js",
+    "test": "mocha tests/*.test.js --file tests/setup.js --timeout 5000 --reporter mochawesome",
     "test:k6": "k6 run -e TEST_TOKEN=123456789teste tests/testK6/contracts.test.js",
     "test:k6:all": "k6 run -e TEST_TOKEN=123456789teste tests/testK6/*.test.js"
   },
